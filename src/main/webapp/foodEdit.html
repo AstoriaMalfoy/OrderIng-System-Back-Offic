@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" name="viewport">
+    <title>Dashboard &mdash; Stisla</title>
+
+    <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+    <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+    <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+
+        <div class="navbar-bg"></div>
+        <div id="header"></div>
+        <div id="sidebar"></div>
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div>菜品信息编辑</div>
+                </h1>
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <form>
+                            <div class="form-group">
+                                <label for="foodName">菜品名称</label>
+                                <input type="text" class="form-control" id="foodName" aria-describedby="">
+                            </div>
+                            <div class="form-group">
+                                <label for="foodPrice">菜品价格</label>
+                                <input type="number" class="form-control" id="foodPrice">
+                            </div>
+                            <button type="button" class="btn btn-danger" style="margin: 10px;float: right" id="back">返回</button>
+                            <button type="button" class="btn btn-primary" style="margin: 10px;float: right" id="save">保存</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+
+<script src="modules/chart.min.js"></script>
+<script src="modules/summernote/summernote-lite.js"></script>
+
+<script src="js/scripts.js"></script>
+<script src="js/include.js"></script>
+<script>
+    //根据传递过来的参数name获取对应的值
+    function getParameter(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+        var r = location.search.substr(1).match(reg);
+        if (r!=null) return (r[2]); return null;
+    }
+
+    $("#back").click(function () {
+        history.back();
+    });
+
+    function testName(){
+        if ($("#foodName").val()!=null && $("#foodName").val()!=""){
+            return true;
+        }
+        alert("请输入菜品名称");
+        return false;
+    }
+    function testPrice(){
+        if ($("#foodPrice").val()!=null && $("#foodPrice").val()!=""){
+            return true;
+        }
+        alert("请输入价格");
+        return false;
+    }
+
+    $(function () {
+        var fid = getParameter("fid");
+        //用于获取菜品的可编辑信息 用于信息的展示
+        if(fid!=null){
+            //获取到相应的fid信息 为菜品的编辑页面
+            var upData = {
+                "fid":fid
+            };
+            $.get("/food/getFoodInfo",upData,function (resultInfo) {
+                if (resultInfo.flag){
+                //    服务器响应成功
+                    $("#foodName").val(resultInfo.data.f_name);
+                    $("#foodPrice").val(resultInfo.data.f_price);
+                //    给保存按钮绑定事件
+                    $("#save").click(function () {
+                        if (testName()&&testPrice()){
+                            var name = $("#foodName").val();
+                            var price = $("#foodPrice").val();
+                            var updateInf = {
+                                "fid":fid,
+                                "name":name,
+                                "price":price
+                            }
+                            $.post("/food/updateFood",updateInf,function (resultInfo) {
+                                if (resultInfo.flag){
+                                    alert("数据保存成功");
+                                    history.back();
+                                }else{
+                                    alert(resultInfo.errorMessage);
+                                }
+                            })
+                        }
+                    })
+                }
+
+            })
+        }else{
+        //    未获取到相关的fid信息，为菜品的创建页面
+            $("#save").click(function () {
+                if (testPrice() && testName()){
+                    var name = $("#foodName").val();
+                    var price = $("#foodPrice").val();
+                    var insertData = {
+                        "name":name,
+                        "price":price
+                    }
+                    $.post("/food/newFood",insertData,function (resultInfo) {
+                        if (resultInfo.flag){
+                            alert("添加成功");
+                        }else{
+                            alert(resultInfo.errorMessage);
+                        }
+                    })
+                }
+            });
+        }
+
+    });
+</script>
+</body>
+</html>

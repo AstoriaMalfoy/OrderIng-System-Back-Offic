@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no"
+          name="viewport">
+    <title>Dashboard &mdash; Stisla</title>
+
+    <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+    <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+    <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+
+        <div class="navbar-bg"></div>
+        <div id="header"></div>
+        <div id="sidebar"></div>
+
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div>餐桌使用情况一览</div>
+                </h1>
+                <span id="table_position">
+
+                    <div id="accordion">
+                    </div>
+                </span>
+            </section>
+        </div>
+
+        <div id="footer"></div>
+
+    </div>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+
+<script src="modules/chart.min.js"></script>
+<script src="modules/summernote/summernote-lite.js"></script>
+<script src="js/scripts.js"></script>
+<script src="js/include.js"></script>
+<script src="modules/MiniDialog-es5.min.js"></script>
+<script>
+    const tableSum = 10;
+    let showSpan = -1;
+    $(function () {
+        regetTableInfo();
+        setInterval('regetTableInfo()',60*1000);
+    });
+
+    function thisShow(thisId) {
+        if (showSpan!==thisId){
+            showSpan = thisId;
+        }else{
+            showSpan = -1;
+        }
+    }
+    //异步请求刷新餐桌详情函数
+    function regetTableInfo() {
+        $.get("/table/getAllTable", null, function (resultInfo) {
+            if (resultInfo.flag) {
+                //成功接受到数据 开始拼接表格信息
+                let inner = '';
+                for (let i = 1; i <= tableSum; i++) {
+                    let tableInnerCom = '';
+                    let tableInnerNCom = '';
+                    let cardInner = '';
+                    let foodComplete = true;
+                    if (resultInfo.data[i] !== undefined) {
+                        //    餐桌正在使用
+                        //    首先拼接表格中的内容
+
+                        for (let index = 0; index < resultInfo.data[i].length; ++index){
+                            if (resultInfo.data[i][index].t_state === 'false'){
+                                //    未上餐
+                                foodComplete = false;
+                                tableInnerNCom += '' +
+                                    ' <tr>\n' +
+                                    '    <td>'+(index + 1)+'</td>' +
+                                    '    <td>'+ resultInfo.data[i][index].f_name +'</td>' +
+                                    '    <td><div class="badge badge-danger">未上餐</div></td>' +
+                                    '    <td>'+ resultInfo.data[i][index].f_price+'</td>' +
+                                    '    <td><a href="javaScript:serving('+resultInfo.data[i][index].t_id+',\''+resultInfo.data[i][index].f_name+'\','+resultInfo.data[i][index].t_num+')" class="btn btn-action btn-primary">上菜</a>' +
+                                    '        <a href="javaScript:cancer('+resultInfo.data[i][index].t_id+',\''+resultInfo.data[i][index].f_name+'\','+resultInfo.data[i][index].t_num+')" class="btn btn-action btn-primary">取消</a></td>' +
+                                    '</tr>'
+                            }else{
+                                //    已经上餐
+                                tableInnerCom += '' +
+                                    '<tr>\n' +
+                                    '    <td>'+(index + 1)+'</td>\n' +
+                                    '    <td>'+ resultInfo.data[i][index].f_name +'</td>' +
+                                    '    <td><div class="badge badge-success">已上餐</div></td>' +
+                                    '    <td>'+resultInfo.data[i][index].f_price+'</td>' +
+                                    '    <td><a href="" class="btn btn-action btn-secondary">上菜</a>' +
+                                    '        <a href="#" class="btn btn-action btn-secondary">取消</a></td>' +
+                                    '</tr>'
+                            }
+                        }
+                        //    目前tableInner已经拼接完成，开始拼接cardInner;
+                        cardInner += '' +
+                            '<div class="card" id="table'+i+'">\n' +
+                            '<div class="card-header" style="padding: 0">' +
+                            '<span class="card-link collapsed" data-toggle="collapse" href="#collapse'+i+'"' +
+                            ' style="display: block;padding: 12px;width: 100%" onclick="thisShow('+i+')">' +
+                            '        <h4 style="display: inline-block">'+ i +'号桌</h4>' +
+                            '        <div class="" style="display: inline-block; float: right">' +
+                            '            <h4 style="display: inline-block">状态:&nbsp;&nbsp;</h4>' +
+                            '            <div class="badge badge-danger">使用中</div>';
+                        if (foodComplete){
+                            cardInner += '<div class="badge badge-success" style="margin-left: 5px">菜品备齐</div>'
+                        }else{
+                            cardInner += '<div class="badge badge-danger" style="margin-left: 5px">菜品未备齐</div>'
+                        }
+                        cardInner +='' +
+
+                            '<span style="display: inline;">' +
+                            '<a href="javaScript:invoicing('+i+')" class="btn btn-action btn-primary" style="border-radius: .25rem;margin-left: 20px;">结账</a>' +
+                            '</span>' +
+                            '</div>' +
+                            '</span>' +
+                            '</div>' +
+                            '<div id="collapse'+i+'" class="';
+                        if (i == showSpan){
+                            cardInner += 'collapse show';
+                        }else{
+                            cardInner += 'collapse';
+                        }
+                        cardInner += '' +
+                            '" data-parent="#accordion">' +
+                            '<div class="card-body">' +
+                            '<div class="card-body p-0">' +
+                            '<div class="table-responsive">' +
+                            '<table class="table table-striped">' +
+                            '<tbody style="text-align: center">' +
+                            '<tr>' +
+                            '<th style="width: 10%">编号</th>' +
+                            '<th style="width: 40%">菜品名称</th>' +
+                            '<th style="width: 20%">状态</th>' +
+                            '<th style="width: 10%">价格</th>' +
+                            '<th sytle="width: 20%">操作</th>' +
+                            '</tr>' + tableInnerNCom + tableInnerCom +
+                            '</tbody>' +
+                            '</table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                        inner += cardInner;
+                    } else {
+                        //    餐桌未使用
+                        inner += '' +
+                            ' <div class="card" id="table'+i+'">\n' +
+                            '      <div class="card-header" style="padding: 0px">\n' +
+                            '            <span class="collapsed card-link" data-toggle="collapse" href="#collapse'+i+'"\n' +
+                            '                  style="display: inline-block;padding: 12px;width:100%">\n' +
+                            '                <h4 style="display: inline-block">'+i+'号桌</h4>\n' +
+                            '                <div class="" style="display: inline-block; float: right">\n' +
+                            '                    <h4 style="display: inline-block">状态:&nbsp;&nbsp;</h4>\n' +
+                            '                    <div class="badge badge-success">空闲</div>\n' +
+                            '            <span style="display: inline;">' +
+                            '               <a href="javaScript:void(0)" class="btn btn-action btn-secondary" style="border-radius: .25rem;margin-left: 20px;">结账</a>' +
+                            '            </span>' +
+                            '                </div>\n' +
+                            '            </span>\n' +
+                            '      </div>\n' +
+                            '      <div id="collapse'+i+'" class="';
+                        if (i == showSpan){
+                            cardInner += 'collapse show';
+                        }else{
+                            cardInner += 'collapse';
+                        }
+                        cardInner +=
+                            '" data-parent="#accordion">' +
+                            '            <div class="card-body">\n' +
+                            '                该餐桌未使用\n' +
+                            '            </div>\n' +
+                            '      </div>\n' +
+                            '</div>';
+                        inner += cardInner;
+                    }
+                }
+                // $("#table_postion").html(inner);
+                $("#accordion").html(inner);
+            } else {
+                alert(resultInfo.errorMessage);
+            }
+        })
+    }
+    // 上菜函数 用于完成上菜逻辑
+    function serving(t_id,f_name,t_num) {
+        let res = confirm("确认上菜:\n 桌号：" + t_num + "\n 菜名：" + f_name + "");
+        var requestData = {"tid":t_id};
+        if (res){
+            $.get("table/serving",requestData,function (resultInfo) {
+                if (resultInfo.flag){
+                    alert("上菜成功");
+                    refreshTable(t_num);
+                }else{
+                    alert(resultInfo.errorMessage);
+                }
+            });
+        }
+    }
+    //用于单独刷新某一个table
+    function refreshTable(tableNum) {
+        var requestData = {"tNum":tableNum};
+        $.get("/table/refreshTable",requestData,function (resultInfo) {
+            var tableId = "#table" + tableNum;
+            console.log(tableId);
+            var comFlag = true;
+            var inner = '';
+            var tableInner = '';
+            if (resultInfo.flag) {
+                if (resultInfo.data == undefined || resultInfo.data.foods.length == 0){
+                //    餐桌未使用
+                    inner += '' +
+                        '      <div class="card-header" style="padding: 0px">\n' +
+                        '            <span class="collapsed card-link" data-toggle="collapse" href="#collapse'+tableNum+'"\n' +
+                        '                  style="display: inline-block;padding: 12px;width: 100%">\n' +
+                        '                <h4 style="display: inline-block">'+tableNum+'号桌</h4>\n' +
+                        '                <div class="" style="display: inline-block; float: right">\n' +
+                        '                    <h4 style="display: inline-block">状态:&nbsp;&nbsp;</h4>\n' +
+                        '                    <div class="badge badge-success">空闲</div>\n' +
+                        '                    <a href="javaScript:invoicing('+tableNum+')" class="btn btn-action btn-secondary"\n' +
+                        '                       style="border-radius: .25rem;margin-left: 20px">结账</a>' +
+                        '                </div>\n' +
+                        '            </span>\n' +
+                        '      </div>\n' +
+                        '      <div id="collapse'+tableNum+'" class="';
+                    if (tableNum == showSpan){
+                        inner += 'collapse show';
+                    }else{
+                        inner += 'collapse';
+                    }
+                    inner +=
+                        '" data-parent="#accordion">' +
+                        '<div class="card-body">该餐桌未使用</div>' +
+                        '</div>' ;
+                    $(tableId).html(inner);
+                    inner = "";
+                }else{
+                //    餐桌已经有人使用
+                    var tableInnerNCom = '';
+                    var tableInnerCom = '';
+                    for (let i = 0; i <resultInfo.data.foods.length ; i++) {
+                        if (resultInfo.data.foods[i].t_state == 'false'){
+                            //    未上餐
+                            comFlag = false;
+                            tableInnerNCom += '' +
+                                ' <tr>\n' +
+                                '    <td>'+(i + 1)+'</td>' +
+                                '    <td>'+ resultInfo.data.foods[i].f_name +'</td>' +
+                                '    <td><div class="badge badge-danger">未上餐</div></td>' +
+                                '    <td>'+ resultInfo.data.foods[i].f_price+'</td>' +
+                                '    <td><a href="javaScript:serving('+resultInfo.data.foods[i].t_id+',\''+resultInfo.data.foods[i].f_name+'\','+resultInfo.data.foods[i].t_num+')" class="btn btn-action btn-primary">上菜</a>' +
+                                '        <a href="javaScript:cancer('+resultInfo.data.foods[i].t_id+',\''+resultInfo.data.foods[i].f_name+'\','+resultInfo.data.foods[i].t_num+')" class="btn btn-action btn-primary">取消</a></td>' +
+                                '</tr>'
+                        }else{
+                            //    已经上餐
+                            tableInnerCom += '' +
+                                '<tr>\n' +
+                                '    <td>'+(i + 1)+'</td>\n' +
+                                '    <td>'+ resultInfo.data.foods[i].f_name +'</td>' +
+                                '    <td><div class="badge badge-success">已上餐</div></td>' +
+                                '    <td>'+resultInfo.data.foods[i].f_price+'</td>' +
+                                '    <td><a href="" class="btn btn-action btn-secondary">上菜</a>' +
+                                '        <a href="#" class="btn btn-action btn-secondary">取消</a></td>' +
+                                '</tr>'
+                        }
+                    }
+                    tableInner = tableInnerNCom + tableInnerCom;
+                    inner +='' +
+                        '<div class="card-header" style="padding: 0px">' +
+                        '    <span class="card-link collapsed" data-toggle="collapse" href="#collapse'+tableNum+'"' +
+                        '          style="display: inline-block;padding: 12px;width: 100%" onclick="thisShow('+tableNum+')">' +
+                        '        <h4 style="display: inline-block">'+ tableNum +'号桌</h4>' +
+                        '        <div class="" style="display: inline-block; float: right">' +
+                        '            <h4 style="display: inline-block">状态:&nbsp;&nbsp;</h4>' +
+                        '            <div class="badge badge-danger">使用中</div>';
+                    if (comFlag){
+                        inner += '<div class="badge badge-success" style="margin-left: 5px">菜品备齐</div>'
+                    }else{
+                        inner += '<div class="badge badge-danger" style="margin-left: 5px">菜品未备齐</div>'
+                    }
+                    inner +='' +
+                        '<span>' +
+                        '<a href="javaScript:invoicing('+tableNum+')" class="btn btn-action btn-primary" style="border-radius: .25rem;margin-left: 20px">结账</a>' +
+                        '</span>' +
+                        '</div>' +
+                        '</span>' +
+                        '</div>' +
+                        '<div id="collapse'+tableNum+'" class="';
+                    if (tableNum == showSpan){
+                        inner += 'collapse show';
+                    }else{
+                        inner += 'collapse';
+                    }
+                    inner += '' +
+                        '" data-parent="#accordion">' +
+                        '<div class="card-body">' +
+                        '<div class="card-body p-0">' +
+                        '<div class="table-responsive">' +
+                        '<table class="table table-striped">' +
+                        '<tbody style="text-align: center">' +
+                        '<tr>' +
+                        '<th style="width: 10%">编号</th>' +
+                        '<th style="width: 40%">菜品名称</th>' +
+                        '<th style="width: 20%">状态</th>' +
+                        '<th style="width: 10%">价格</th>' +
+                        '<th sytle="width: 20%">操作</th>' +
+                        '</tr>' + tableInner +
+                        '</tbody>' +
+                        '</table>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                    $(tableId).html(inner);
+                    inner = "";
+
+                }
+            }else{
+                alert(resultInfo.errorMessage);
+            }
+
+        })
+    }
+    // 取消函数 用于完成删除菜品的逻辑
+    function cancer(t_id,f_name,t_num) {
+        let res = confirm("请确删除:\n 桌号：" + t_num + "\n 菜名：" + f_name + "");
+        if (res){
+        //    确定删除
+            var request = {"tid":t_id};
+            $.get("/table/delTableFood",request,function (resultInfo) {
+                if(resultInfo.flag){
+                    alert("删除成功");
+                    refreshTable(t_num);
+                }else{
+                    alert(resultInfo.errorMessage);
+                }
+            })
+        }
+    }
+    // 结账函数 用于完成结账操作
+    function invoicing(t_num) {
+        // 首先判断是否所有菜品都上完了
+        var requestData = {"tNum":t_num};
+        $.get("/table/canInvoicing",requestData,function (resultInfo) {
+            if (resultInfo.flag){
+                //获取结账信息
+
+                $.get("/table/refreshTable",requestData,function (resultInfo){
+                    if (resultInfo.flag){
+                        var contentHtml =
+                            '<table class="table table-sm">\n' +
+                            '  <thead>\n' +
+                            '    <tr>\n' +
+                            '      <th scope="col">#</th>\n' +
+                            '      <th scope="col">菜品名称</th>\n' +
+                            '      <th scope="col">数量</th>\n' +
+                            '      <th scope="col">单价</th>\n' +
+                            '    </tr>\n' +
+                            '  </thead>\n' +
+                            '  <tbody>\n' ;
+                        var countMoney = 0;
+                        for (let i = 0; i <resultInfo.data.foods.length ; i++) {
+                            contentHtml +=
+                                '<tr>\n' +
+                                '  <th scope="row">'+(i+1)+'</th>\n' +
+                                '  <td>'+resultInfo.data.foods[i].f_name+'</td>\n' +
+                                '  <td>x1</td>\n' +
+                                '  <td>'+resultInfo.data.foods[i].f_price+'</td>\n' +
+                                '</tr>\n' ;
+                            countMoney += parseInt(resultInfo.data.foods[i].f_price);
+                        }
+                        contentHtml +=
+                            '  </tbody>\n' +
+                            '</table>' +
+                            '<hr>' +
+                            '<span style="float: right;margin: 5px 20px">共计：'+countMoney+'元</span>';
+                        Dialog({
+                            title: t_num + " 号桌结账",
+                            content: contentHtml,
+                            fullscreen: true,              // 全屏显示
+                            ok: {
+                                text: "确定",                // 确定按钮的文字
+                                loading: false,             // 点击确定按钮时，是否显示 loading 效果（此时将不会执行关闭对话框的操作）
+                                loadingText: "确定",         // 显示 loading 效果时，确定按钮文字的变化
+                                notClose: false,            // 点击确定按钮是否关闭对话框
+                                callback: function () {
+                                    $.get("/table/invoicing",requestData,function (resultInfo) {
+                                        if (resultInfo.flag){
+                                            alert("成功");
+                                            refreshTable(t_num)
+
+                                        }else{
+                                            alert(resultInfo.errorMessage);
+                                        }
+                                    })
+                                },
+                            }
+                        });
+                    }else{
+
+                    }
+                });
+
+            }else{
+                alert(resultInfo.errorMessage);
+            }
+        });
+
+    }
+</script>
+</body>
+</html>

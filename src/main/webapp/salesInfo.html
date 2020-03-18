@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no"
+          name="viewport">
+    <title>Dashboard &mdash; Stisla</title>
+
+    <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+    <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+    <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+
+        <div class="navbar-bg"></div>
+        <div id="header"></div>
+        <div id="sidebar"></div>
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div>"<span id="food_name"></span>"&nbsp;&nbsp;销量统计信息</div>
+                </h1>
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="card card-sm-3">
+                            <div class="card-icon bg-primary">
+                                <i class="ion-ios-pie"></i>
+                            </div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>当月销量</h4>
+                                </div>
+                                <div class="card-body" id="this_month_sales">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="card card-sm-3">
+                            <div class="card-icon bg-danger">
+                                <i class="ion-ios-pie-outline"></i>
+                            </div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>近一年销量</h4>
+                                </div>
+                                <div class="card-body" id="this_year_sales">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="card card-sm-3">
+                            <div class="card-icon bg-warning">
+                                <i class="ion-social-yen"></i>
+                            </div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>当月销售额</h4>
+                                </div>
+                                <div class="card-body" id="this_month_money">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-12">
+                        <div class="card card-sm-3">
+                            <div class="card-icon bg-success">
+                                <i class="ion-social-yen-outline"></i>
+                            </div>
+                            <div class="card-wrap">
+                                <div class="card-header">
+                                    <h4>近一年销售额</h4>
+                                </div>
+                                <div class="card-body" id="this_year_money">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>近一年每月销售量</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                    <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                        <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                    </div>
+                                    <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                        <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                    </div>
+                                </div>
+                                <canvas id="myChart2" width="386" height="192" class="chartjs-render-monitor" style="display: block; height: 168px; width: 337px;"></canvas>
+                                <div class="card-header"><h4 style="float:right;">共计<span id="underTableCount"></span>份</h4></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>近一年每月销售额</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="chartjs-size-monitor"
+                                     style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+                                    <div class="chartjs-size-monitor-expand"
+                                         style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                        <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+                                    </div>
+                                    <div class="chartjs-size-monitor-shrink"
+                                         style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                                        <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+                                    </div>
+                                </div>
+                                <canvas id="myChart" style="display: block; height: 168px; width: 337px;" width="386"
+                                        height="192" class="chartjs-render-monitor"></canvas>
+                                <div class="card-header"><h4 style="float:right;">共计<span id="underTableMoney"> </span>元</h4></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+
+<script src="modules/chart.min.js"></script>
+<script src="modules/summernote/summernote-lite.js"></script>
+
+<script src="js/scripts.js"></script>
+<script src="js/include.js"></script>
+
+<script>
+    //根据传递过来的参数name获取对应的值
+    function getParameter(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+        var r = location.search.substr(1).match(reg);
+        if (r!=null) return (r[2]); return null;
+    }
+
+    //获取菜品的fid信息
+    var fid = getParameter("fid");
+    var fidData = {
+        "fid":fid
+    }
+    $.post("/food/getSales",fidData,function (resultInfo) {
+        if (resultInfo.flag){
+            //设置标题
+            $("#food_name").html(resultInfo.data.name);
+            var labels = [,,,,,,,,,,,];
+            var salesCount = [,,,,,,,,,,,];
+            var salesMoney = [,,,,,,,,,,,];
+            if (resultInfo.data.foodSales.length>=12){
+            //    获取的信息大约12个月
+                for (let i = 0; i < 12; i++) {
+                    var dateStr = resultInfo.data.foodSales[i].fs_Id;
+                    var sales = resultInfo.data.foodSales[i].fs_count;
+                    labels[11-i] = dateStr.substr(0,4) + "年" + dateStr.substr(4,2) + "月";
+                    salesCount[11-i] = sales;
+                    salesMoney[11-i] = parseInt(sales) * parseInt(resultInfo.data.price);
+                }
+            }else{
+            //    获取的信息不足12个月
+                for (let i = 0; i <12 ; i++) {
+                    if (i<resultInfo.data.foodSales.length){
+                        var dateStr = resultInfo.data.foodSales[i].fs_Id;
+                        var sales = resultInfo.data.foodSales[i].fs_count;
+                        labels[11-i] = dateStr.substr(0,4) + "年" + dateStr.substr(4,2) + "月";
+                        salesCount[11-i] = sales;
+                        salesMoney[11-i] = parseInt(sales) * parseInt(resultInfo.data.price);
+                    }else{
+                        labels[11-i] = "";
+                        salesCount[11-i] = 0;
+                        salesMoney[11-i] = 0;
+                    }
+                }
+            }
+        //    设置当月销量
+            var thisMonthSalesCount = salesCount[11];
+            $("#this_month_sales").html(thisMonthSalesCount);
+            var thisMonthSalesMoney = salesMoney[11];
+            $("#this_month_money").html(thisMonthSalesMoney);
+            var thisYearSalesCount = 0;
+            var thisYearSalesMoney = 0;
+            for (let i = 0; i <12 ; i++) {
+                thisYearSalesCount += salesCount[i];
+                thisYearSalesMoney += salesMoney[i];
+            }
+            $("#this_year_sales").html(thisYearSalesCount);
+            $("#this_year_money").html(thisYearSalesMoney);
+            $("#underTableCount").html(thisYearSalesCount);
+            $("#underTableMoney").html(thisYearSalesMoney);
+            //销售额可视化
+            var ctx = document.getElementById("myChart").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [labels[0], labels[1], labels[2], labels[3], labels[4], labels[5], labels[6],labels[7],labels[8],labels[9],labels[10],labels[11]],
+                    datasets: [{
+                        label: 'Statistics',
+                        data: [salesMoney[0], salesMoney[1], salesMoney[2], salesMoney[3], salesMoney[4], salesMoney[5], salesMoney[6],salesMoney[7],salesMoney[8],salesMoney[9],salesMoney[10],salesMoney[11]],
+                        borderWidth: 2,
+                        backgroundColor: 'rgb(87,75,144)',
+                        borderColor: 'rgb(87,75,144)',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 150
+                            }
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                display: false
+                            }
+                        }]
+                    },
+                }
+            });
+            //销量可视化数据
+            var ctx = document.getElementById("myChart2").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [labels[0], labels[1], labels[2], labels[3], labels[4], labels[5], labels[6],labels[7],labels[8],labels[9],labels[10],labels[11]],
+                    datasets: [{
+                        label: 'Statistics',
+                        data: [salesCount[0], salesCount[1], salesCount[2], salesCount[3], salesCount[4], salesCount[5], salesCount[6],salesCount[7],salesCount[8],salesCount[9],salesCount[10],salesCount[11]],
+                        borderWidth: 2,
+                        backgroundColor: 'rgb(87,75,144)',
+                        borderColor: 'rgb(87,75,144)',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#ffffff',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 150
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                display: true
+                            },
+                            gridLines: {
+                                display: false
+                            }
+                        }]
+                    },
+                }
+            });
+
+
+        }
+    });
+</script>
+
+</body>
+</html>

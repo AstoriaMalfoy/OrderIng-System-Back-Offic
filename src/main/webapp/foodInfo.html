@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" name="viewport">
+    <title>Dashboard &mdash; Stisla</title>
+
+    <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+    <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+    <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+
+        <div class="navbar-bg"></div>
+        <div id="header"></div>
+        <div id="sidebar"></div>
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div>
+                        菜品管理
+                    </div>
+                    <a href="foodEdit.html" class="btn btn-action btn-primary" style="margin-left: 20px;float: right">新建菜品信息</a>
+                </h1>
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>菜品信息表</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <tbody id="table_list">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <nav class="d-inline-block">
+                                    <ul class="pagination mb-0" id="list_bar">
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+
+<script src="modules/chart.min.js"></script>
+<script src="modules/summernote/summernote-lite.js"></script>
+
+<script src="js/scripts.js"></script>
+<script src="js/include.js"></script>
+<script>
+    //根据传递过来的参数name获取对应的值
+    function getParameter(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+        var r = location.search.substr(1).match(reg);
+        if (r!=null) return (r[2]); return null;
+    }
+
+
+    //首先获取currentPage和pageSize
+    var currentPage = getParameter("currentPage");
+    var pageSize = getParameter("pageSize");
+
+    var data = {
+        "currentPage":currentPage,
+        "pageSize":pageSize
+    }
+
+    function deleteFood(f_id,f_name){
+        let b = confirm("确认删除有关" + f_name + "的所有相关信息吗");
+        if (b){
+        //    确认删除
+            var deleteDate = {
+                "fid":f_id
+            };
+            $.get("/food/deleteFood",deleteDate,function (resultInfo){
+                if (resultInfo.flag){
+                    alert("删除成功")
+                    location.reload(true);
+                }else{
+                    alert(resultInfo.errorMessage);
+                }
+            });
+        }else{
+        //    不删除
+        }
+    }
+    $(function () {
+    //    通过异步请求获取携带分页信息的菜品列表
+    //    通过URL获取currentPage和pageSize
+        console.log(data);
+        var inner = '<tr><th>#</th><th>菜品名称</th><th>菜品价格</th><th>当月销量</th><th>操作</th></tr>';
+        $.get("/food/getAll",data, function (resultInfo) {
+            if (resultInfo.flag){
+                var resultCurrentPage = resultInfo.data.currengPage;
+                var resultPageSize = resultInfo.data.pageSize;
+                //拼接列表
+                for (let i = 0; i < resultInfo.data.listData.length ; i++) {
+                    inner+='<tr><td>'+
+                        (((resultCurrentPage-1)*resultPageSize)+i+1)+'</td><td>'+
+                        resultInfo.data.listData[i].f_name+'</td><td>'+
+                        parseInt(resultInfo.data.listData[i].f_price).toFixed(2) +'</td><td>'+
+                        resultInfo.data.listData[i].monthSell+'</td><td><a href="foodEdit.html?fid='+
+                        resultInfo.data.listData[i].f_id +'" class="btn btn-action btn-primary">修改</a><a href="salesInfo.html?fid='+
+                        resultInfo.data.listData[i].f_id +'" class="btn btn-action btn-primary" style="margin-left: 20px">查看销量信息</a><a href="javascript:deleteFood('+
+                        resultInfo.data.listData[i].f_id+',\''+
+                        resultInfo.data.listData[i].f_name+'\')" class="btn btn-action btn-danger" style="margin-left: 20px">删除</a></td></tr>';
+                }
+                $("#table_list").html(inner);
+                inner = "";
+
+            //    拼接分页条
+                var resultListCount = resultInfo.data.listCount;
+                var resultPageCount = resultInfo.data.pageCount;
+                if (resultCurrentPage == 1){
+                    inner+='<li class="page-item disabled">' +
+                        '<a class="page-link" href="#" tabindex="-1">' +
+                        '<i class="ion ion-chevron-left"></i></a></li>';
+                }else{
+                    inner+='<li class="page-item">' +
+                        '<a class="page-link" href="foodInfo.html?currentPage='+
+                        (resultCurrentPage-1)+'" tabindex="-1"><i class="ion ion-chevron-left"></i></a></li>';
+                }
+                var start = resultCurrentPage-4;
+                var end = resultCurrentPage+5;
+                if (start<1){
+                    start = 1;
+                    end = start+9;
+                }
+                if (end>resultPageCount){
+                    end = resultPageCount;
+                    start = end-9;
+                }
+                if (resultPageCount<=10){
+                    start = 1;
+                    end = resultPageCount;
+                }
+                for (let i = start; i <= end; i++) {
+                    if (i == resultCurrentPage){
+                        inner+='<li class="page-item active"><a class="page-link" href="foodInfo.html?currentPage='+
+                            i+'">'+
+                            i+'<span class="sr-only">(current)</span></a></li>';
+                    }else{
+                        inner+='<li class="page-item"><a class="page-link" href="foodInfo.html?currentPage='+
+                            i+'">'+i+'</a></li>';
+                    }
+                }
+                if (resultCurrentPage == resultPageCount){
+                    inner+='<li class="page-item disabled"><a class="page-link" href="#"><i class="ion ion-chevron-right"></i></a></li>';
+                }else{
+                    inner+='<li class="page-item"><a class="page-link" href="foodInfo.html?currentPage='+
+                        (resultCurrentPage+1)+'"><i class="ion ion-chevron-right"></i></a></li>'
+                }
+                $("#list_bar").html(inner);
+                inner = "";
+
+            }
+        })
+        setInterval(function () {
+        },1000*30);
+    });
+</script>
+</body>
+</html>

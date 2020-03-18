@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" name="viewport">
+    <title>Dashboard &mdash; Stisla</title>
+
+    <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+    <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+    <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+
+        <div class="navbar-bg"></div>
+        <div id="header"></div>
+        <div id="sidebar"></div>
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div>业绩曲线</div>
+                </h1>
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>近一月内每日订单统计</h4>
+                            </div>
+                            <div class="card-body"><div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
+                                <canvas id="myChart" width="378" height="189" class="chartjs-render-monitor" style="display: block; height: 165px; width: 330px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+
+<script src="modules/chart.min.js"></script>
+<script src="modules/summernote/summernote-lite.js"></script>
+
+<script src="js/scripts.js"></script>
+<script src="js/include.js"></script>
+<script>
+
+
+    //根据传递过来的参数name获取对应的值
+    function getParameter(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+        var r = location.search.substr(1).match(reg);
+        if (r!=null) return (r[2]); return null;
+    }
+    //存储日期信息
+    var labels = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+    var orderCount = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+    $(function () {
+        getDetail();
+    })
+    function getDetail() {
+        var w_id = getParameter("w_id");
+        var requestDate = {"w_id":w_id};
+        $.get("/waiter/getDetail",requestDate,function (resultInfo) {
+            if (resultInfo.flag){
+                for (let i = 0; i < resultInfo.data.length ; i++) {
+                    labels[i] = resultInfo.data[i].formateDate;
+                    orderCount[i] = resultInfo.data[i].dayOrderCount;
+                }
+                //业绩可视化
+                var ctx = document.getElementById("myChart").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [labels[0], labels[1], labels[2], labels[3], labels[4], labels[5], labels[6],labels[7],labels[8],labels[9],labels[10],labels[11],labels[12],labels[13],labels[14],labels[15],labels[16],labels[17],labels[18],labels[19],labels[20],labels[21],labels[22],labels[23],labels[24],labels[25],labels[26],labels[27],labels[28],labels[29],labels[30],labels[31]],
+                        datasets: [{
+                            label: 'Statistics',
+                            data: [orderCount[0], orderCount[1], orderCount[2], orderCount[3], orderCount[4], orderCount[5], orderCount[6],orderCount[7],orderCount[8],orderCount[9],orderCount[10],orderCount[11],orderCount[12],orderCount[13],orderCount[14],orderCount[15],orderCount[16],orderCount[17],orderCount[18],orderCount[19],orderCount[20],orderCount[21],orderCount[22],orderCount[23],orderCount[24],orderCount[25],orderCount[26],orderCount[27],orderCount[28],orderCount[29],orderCount[30],orderCount[31]],
+                            borderWidth: 2,
+                            backgroundColor: 'rgb(87,75,144)',
+                            borderColor: 'rgb(87,75,144)',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#ffffff',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        legend: {
+                            display: false
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    // stepSize: 150
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
+                                    display: false
+                                }
+                            }]
+                        },
+                    }
+                });
+            }else{
+                alert(resultInfo.errorMessage);
+            }
+        })
+    }
+
+
+</script>
+</body>
+</html>

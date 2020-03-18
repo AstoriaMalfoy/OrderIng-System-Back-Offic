@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no"
+        name="viewport">
+  <title>移动“软”点菜宝餐饮管理后台系统</title>
+
+  <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+  <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+  <link rel="stylesheet" href="css/demo.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+  <section class="section">
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12 col-sm-10 offset-sm-1 col-md-6 offset-md-3 col-lg-8 offset-lg-2 col-xl-4 offset-xl-4">
+          <div class="login-brand">
+            移动“软”点菜宝餐饮管理后台系统
+          </div>
+
+          <div class="card card-primary">
+            <div class="card-header"><h4>登录</h4></div>
+            <div class="alert alert-danger" role="alert" style="margin: 20px;text-align: center" id="errorMessage" hidden>
+
+            </div>
+            <div class="card-body">
+              <form method="POST" action="javascript:submitForm()" class="needs-validation" novalidate="" id="message">
+<!--                用户名区域-->
+                <div class="form-group">
+                  <label for="username">用户名</label>
+                  <input id="username" type="text" class="form-control" name="email" tabindex="1"
+                         required autofocus>
+                  <div class="invalid-feedback">
+                    请输入您的用户名
+                  </div>
+                </div>
+<!--                密码区域-->
+                <div class="form-group">
+                  <label for="password" class="d-block">密码</label>
+                  <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
+                  <div class="invalid-feedback">
+                    请输入您的密码
+                  </div>
+                </div>
+<!--                验证码区域-->
+                <div class="form-group ">
+                  <label for="checkCode" class="d-block">验证码
+                    <div class="float-right">
+                      <a href="javascript:changeCheckCode()">
+                        看不清，换一个
+                      </a>
+                    </div>
+                  </label>
+
+                  <div class="form-inline form-group">
+                      <input id="checkCode" type="text" class="form-control col-sm-5" name="checkCode"
+                             tabindex="2" required>
+                      <img src="/checkCode" width="150px" height="45px"  id="codeImg" style="margin: 0px auto;">
+                      <div class="invalid-feedback">
+                        请输入验证码
+                      </div>
+                  </div>
+
+                </div>
+<!--                登录按钮区域-->
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary btn-block" tabindex="4" id="login_btn">
+                    登录
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="simple-footer">
+            Copyright &copy; ASTORIA 2020
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/moment.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+<script src="js/scripts.js"></script>
+<script src="js/custom.js"></script>
+<script>
+  $(function () {
+    //刷新验证码 点击图片更换验证码操作
+    $("#codeImg").click(function () {
+      changeCheckCode();
+    });
+
+    //点击了提交按钮 首先由本地验证是否填充所有数据域并且格式正确
+    $("#login_btn").click(function () {
+
+    });
+
+
+    $("form").submit(function () {
+
+      //提交数据到服务器
+      var username = $("#username").val();
+      var password = $("#password").val();
+      var checkCode = $("#checkCode").val();
+
+      $.ajax({
+        url: "/user/login",
+        type: "post",
+        data:{
+          "username":username,
+          "password":password,
+          "code":checkCode
+        },
+        success:function(resultInfo){
+          console.log(resultInfo);
+          if (resultInfo.flag){
+            //成功，跳转到后台管理界面
+            location.href=resultInfo.data;
+            $("#errorMessage").prop("hidden",true);
+          }else{
+            //失败，提示错误信息
+            $("#errorMessage").prop("hidden",false);
+            $("#errorMessage").text(resultInfo.errorMessage);
+            changeCheckCode();
+          }
+
+        }
+      });
+      return false;
+    });
+  });
+  function changeCheckCode() {
+    var path = '/checkCode?data' + new Date().getTime();
+    $("#codeImg").prop("src",path);
+  }
+
+</script>
+</body>
+</html>

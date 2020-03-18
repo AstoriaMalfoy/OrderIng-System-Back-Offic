@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" name="viewport">
+    <title>Dashboard &mdash; Stisla</title>
+
+    <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+    <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+    <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="css/demo.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+<div id="app">
+    <div class="main-wrapper">
+
+        <div class="navbar-bg"></div>
+        <div id="header"></div>
+        <div id="sidebar"></div>
+        <div class="main-content">
+            <section class="section">
+                <h1 class="section-header">
+                    <div>员工绩效考核</div>
+                </h1>
+                <div class="row">
+                    <div class="col-12 col-md-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 style="display: inline-block">员工管理</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <tbody id="waiterList">
+                                        <tr>
+                                            <th>编号</th>
+                                            <th>服务员名称</th>
+                                            <th>当天处理订单数</th>
+                                            <th>当月处理订单数</th>
+                                            <th>当月平均处理订单数</th>
+                                            <th>查看详细信息</th>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Irwansyah Saputra</td>
+                                            <td>2017-01-09</td>
+                                            <td><div class="badge badge-success">已上餐</div></td>
+                                            <td>52.23</td>
+                                            <td>
+                                                <a href="#" class="btn btn-action btn-primary">查看详细信息</a>
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+</div>
+
+<script src="modules/jquery.min.js"></script>
+<script src="modules/popper.js"></script>
+<script src="modules/tooltip.js"></script>
+<script src="modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+<script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+<script src="js/sa-functions.js"></script>
+
+<script src="modules/chart.min.js"></script>
+<script src="modules/summernote/summernote-lite.js"></script>
+
+<script src="js/scripts.js"></script>
+<script src="js/include.js"></script>
+<script>
+    $(function () {
+        $.get("/waiter/getUserPreview",null, function (resultInfo) {
+            if(resultInfo.flag){
+                var inner = "";
+                inner +=
+                    '<tr>\n' +
+                    '    <th>编号</th>\n' +
+                    '    <th>服务员名称</th>\n' +
+                    '    <th>当天处理订单数</th>\n' +
+                    '    <th>当月处理订单数</th>\n' +
+                    '    <th>当月平均处理订单数</th>\n' +
+                    '    <th>查看详细信息</th>\n' +
+                    '</tr>';
+                for (let i = 0; i <resultInfo.data.length ; i++) {
+                    inner +=
+                        '<tr>\n' +
+                        '    <td>'+(i+1)+'</td>\n' +
+                        '    <td>'+resultInfo.data[i].w_username+'</td>\n' +
+                        '    <td>'+resultInfo.data[i].todayOrderCount+'</td>\n' +
+                        '    <td>'+resultInfo.data[i].monthOrderCount+'</td>\n' +
+                        '    <td>'+(resultInfo.data[i].monthOrderCount/30).toFixed(2)+'</td>\n' +
+                        '    <td>\n' +
+                        '        <a href="WaiterDetail.html?w_id='+resultInfo.data[i].w_id+'" class="btn btn-action btn-primary">查看详细信息</a>\n' +
+                        '    </td>\n' +
+                        '</tr>'
+                }
+                $("#waiterList").html(inner);
+            }else{
+                alert(resultInfo.errorMessage);
+            }
+        })
+    })
+</script>
+</body>
+</html>

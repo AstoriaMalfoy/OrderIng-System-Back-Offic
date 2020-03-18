@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" name="viewport">
+  <title>Dashboard &mdash; Stisla</title>
+
+  <link rel="stylesheet" href="modules/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="modules/ionicons/css/ionicons.min.css">
+  <link rel="stylesheet" href="modules/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+
+  <link rel="stylesheet" href="modules/summernote/summernote-lite.css">
+  <link rel="stylesheet" href="modules/flag-icon-css/css/flag-icon.min.css">
+  <link rel="stylesheet" href="css/demo.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="app">
+    <div class="main-wrapper">
+
+      <div class="navbar-bg"></div>
+      <div id="header"></div>
+      <div id="sidebar"></div>
+      <div class="main-content">
+        <section class="section">
+          <h1 class="section-header">
+            <div>经营情况总览</div>
+          </h1>
+          <div class="row">
+            <div class="col-lg-4 col-md-6 col-12">
+              <div class="card card-sm-3">
+                <div class="card-icon bg-primary">
+                  <i class="ion ion-person"></i>
+                </div>
+                <div class="card-wrap">
+                  <div class="card-header">
+                    <h4>总员工数量</h4>
+                  </div>
+                  <div class="card-body" id="userCount">
+                    10
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12">
+              <div class="card card-sm-3">
+                <div class="card-icon bg-danger">
+                  <i class="ion ion-ios-paper-outline"></i>
+                </div>
+                <div class="card-wrap">
+                  <div class="card-header">
+                    <h4>今日售出菜品数量</h4>
+                  </div>
+                  <div class="card-body" id="salesCount">
+                    42
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12">
+              <div class="card card-sm-3">
+                <div class="card-icon bg-warning">
+                  <i class="ion ion-paper-airplane"></i>
+                </div>
+                <div class="card-wrap">
+                  <div class="card-header">
+                    <h4>今日营业额</h4>
+                  </div>
+                  <div class="card-body" id="todayMoney">
+                    120
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-8 col-md-12 col-12 col-sm-12">
+              <div class="card">
+                <div class="card-header">
+                  <h4>营业额曲线图</h4>
+                </div>
+                <div class="card-body">
+                  <canvas id="myChart" height="158"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-12 col-sm-12">
+              <div class="card">
+                <div class="card-header">
+                  <h4>今日活跃员工</h4>
+                </div>
+                <div class="card-body">             
+                  <ul class="list-unstyled list-unstyled-border" id="waiterList">
+
+                  </ul>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div id="footer"></div>
+
+    </div>
+  </div>
+
+  <script src="modules/jquery.min.js"></script>
+  <script src="modules/popper.js"></script>
+  <script src="modules/tooltip.js"></script>
+  <script src="modules/bootstrap/js/bootstrap.min.js"></script>
+  <script src="modules/nicescroll/jquery.nicescroll.min.js"></script>
+  <script src="modules/scroll-up-bar/dist/scroll-up-bar.min.js"></script>
+  <script src="js/sa-functions.js"></script>
+
+  <script src="modules/chart.min.js"></script>
+  <script src="modules/summernote/summernote-lite.js"></script>
+
+  <script src="js/scripts.js"></script>
+  <script src="js/include.js"></script>
+  <script>
+    $(function () {
+      //用于获取员工数量
+      $.get("/waiter/getWaiterCount",null, function (resultInfo) {
+          if (resultInfo.flag){
+            $("#userCount").html(resultInfo.data);
+          }else{
+            alert(resultInfo.errorMessage);
+          }
+      });
+    //  用于获取今日售出菜品数量
+      $.get("/waiter/getSalesCount",null,function (resultInfo) {
+        if (resultInfo.flag){
+          $("#salesCount").html(resultInfo.data);
+        }else{
+          alert(resultInfo.errorMessage);
+        }
+      });
+      // 获取今日到目前营业额
+      $.get("/turnover/todayMoney",null,function (resultInfo) {
+        if (resultInfo.flag){
+          $("#todayMoney").html(resultInfo.data);
+        }else{
+          alert(resultInfo.errorMessage);
+        }
+      });
+      //获取近15天营业额
+      $.get("/turnover/recently",null, function (resultInfo) {
+        if(resultInfo.flag){
+          var dateList = [,,,,,,,,,,,,,,];
+          var turnOverList = [,,,,,,,,,,,,,,];
+          for (let i = 0; i <resultInfo.data.length ; i++) {
+            dateList[i] = resultInfo.data[i]==null?"":resultInfo.data[i].date;
+            turnOverList[i] = resultInfo.data[i]==null?"":resultInfo.data[i].turnover;
+          }
+          var ctx = document.getElementById("myChart").getContext('2d');
+          var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: [dateList[14], dateList[13], dateList[12], dateList[11], dateList[10],dateList[9],dateList[8],dateList[7],dateList[6],dateList[5],dateList[4],dateList[3],dateList[2],dateList[1],dateList[0]],
+              datasets: [{
+                label: 'Statistics',
+                data: [turnOverList[14],turnOverList[13],turnOverList[12],turnOverList[11],turnOverList[10],turnOverList[9],turnOverList[8],turnOverList[7],turnOverList[6],turnOverList[5],turnOverList[4],turnOverList[3],turnOverList[2],turnOverList[1],turnOverList[0]],
+                borderWidth: 2,
+                backgroundColor: 'rgb(87,75,144)',
+                borderColor: 'rgb(87,75,144)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#ffffff',
+                pointRadius: 4
+              }]
+            },
+            options: {
+              legend: {
+                display: false
+              },
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true,
+                    // stepSize: 150
+                  }
+                }],
+                xAxes: [{
+                  gridLines: {
+                    display: false
+                  }
+                }]
+              },
+            }
+          });
+        }else{
+          alert(resultInfo.errorMessage);
+        }
+      })
+      //  获取5名活跃员工
+      $.get("/waiter/getHotWaiter",null, function (resultInfo) {
+        if (resultInfo.flag){
+          var inner = '';
+          for (let i = 0; i <resultInfo.data.length ; i++) {
+            inner+=
+                    '<li class="media">\n' +
+                    '  <div class="media-body">\n' +
+                    '    <div class="float-right"><small>'+resultInfo.data[i].wp_orderCount+'单</small></div>\n' +
+                    '    <div class="media-title">'+resultInfo.data[i].userName+'</div>\n' +
+                    '  </div>\n' +
+                    '</li>'
+          }
+          $("#waiterList").html(inner);
+        }else{
+          alert(resultInfo.errorMessage);
+        }
+      });
+    });
+
+
+
+  </script>
+  <script>
+  </script>
+</body>
+</html>

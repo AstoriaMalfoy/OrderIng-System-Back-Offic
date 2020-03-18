@@ -1,0 +1,87 @@
+<div class="main-sidebar">
+    <aside id="sidebar-wrapper">
+        <div class="sidebar-brand">
+            <a href="index.html">管理后台</a>
+        </div>
+        <div class="sidebar-user">
+            <div class="sidebar-user-picture">
+                <img alt="image" src="img/avatar/avatar-1.jpeg">
+            </div>
+            <div class="sidebar-user-details">
+                <div class="user-name" id="username">ASTORIA</div>
+                <div class="user-role">
+                    管理员
+                </div>
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="menu-header">数据总览</li>
+            <li>
+                <a href="index.html"><i class="ion-stats-bars"></i><span>总览</span></a>
+            </li>
+
+            <li class="menu-header">操作选项</li>
+            <li>
+                <a href="foodList.html"><i class="ion-android-restaurant"></i><span>待上菜品信息</span></a>
+            </li>
+            <li>
+                <a href="tableInfo.html"><i class="ion-android-bar"></i><span>餐桌情况</span></a>
+            </li>
+            <li>
+                <a href="waiterInfo.html"><i class="ion-ios-people"></i><span>员工绩效考核</span></a>
+            </li>
+            <li>
+                <a href="foodInfo.html"><i class="ion-ios-nutrition"></i><span>菜品信息编辑</span></a>
+            </li>
+
+            <li class="menu-header">更多权限操作</li>
+            <li>
+                <a href="javascript:certification()"><i class="ion-person"></i>服务员信息更改</a>
+            </li>
+        </ul>
+        <div class="p-3 mt-4 mb-4">
+            <a href="/exit" class="btn btn-danger btn-shadow btn-round has-icon has-icon-nofloat btn-block">
+                <i class="ion-power"></i> <div>退出系统</div>
+            </a>
+        </div>
+    </aside>
+</div>
+<script src="modules/MiniDialog-es5.min.js"></script>
+<script>
+    var result = null;
+    function certification() {
+        Dialog({
+            title: "用户身份验证",
+            content: '' +
+                '<h6>以下操作为高风险操作，其输入当前管理员密码继续</h6>\n' +
+                '密码：<input type="password" name="password" style="margin: 20px auto;display: inline-block" id="password"> ',
+            ok: {
+                text: "确定",                // 确定按钮的文字
+                loading: false,             // 点击确定按钮时，是否显示 loading 效果（此时将不会执行关闭对话框的操作）
+                loadingText: "确定",         // 显示 loading 效果时，确定按钮文字的变化
+                notClose: false,            // 点击确定按钮是否关闭对话框
+                callback: function () {
+                //    将密码发送到服务端，并返回结果 如果错误返回false,如果正确返回编辑页面的地址
+                    var pw =$("#password").val();
+                    var requestDate = {"pw":pw};
+                    $.get("/user/testUser",requestDate,function (resultInfo) {
+                        if (resultInfo.flag){
+                            result = resultInfo.data;
+                        }else{
+                            alert(resultInfo.errorMessage);
+                        }
+                    })
+                }    // 点击确定按钮的回调函数
+            },
+            showButton: true,
+            height:500,
+            borderRadius: 6,                // 对话框圆角值，单位：px
+            width: 500,                     // 对话框宽度，单位：px
+            afterClose: function () {
+                if (result != null){
+                    location.href = result;
+                }
+            }
+        })
+    }
+</script>
